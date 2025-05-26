@@ -9,46 +9,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $username = $_POST['username'] ?? '';
   $password = $_POST['password'] ?? '';
 
-  // ❌ VULNERABLE SQL (for demonstration)
-  $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+
+    // ❌ Unsafe SQL query (vulnerable to SQL injection)
+    // $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
 
 
-//   // ✅ This is the SQL query using placeholders (question marks) to prevent SQL injection
-// $sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    try {
+      $sql = "SELECT * FROM users WHERE username = ?";
+      $showSql = $sql;
 
-// // 🧪 Optional: This shows the raw SQL string safely (without injecting user input)
-// // It’s useful for debugging or displaying the query without revealing sensitive input
-// $showSql = $pdo->quote($sql); 
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$username]);
+      $result = $stmt->fetch();
 
-// // 🛡️ Prepare the SQL query using PDO (prevents SQL injection)
-// // This tells MySQL to treat the next inputs as data, not executable SQL
-// $stmt = $pdo->prepare($sql);
+      if ($result && password_verify($password, $result['password'])) {
+        session_regenerate_id(true);
+        $_SESSION['user'] = $result['username'];
+        $_SESSION['role'] = $result['role'];
+        $message = "✅ Login successful! Welcome, {$result['username']} (role: {$result['role']})";
 
-// // ▶️ Execute the query and pass the user input as an array to bind to the placeholders
-// // The first ? gets $username, the second gets $password
-// $stmt->execute([$username, $password]);
+        // ✅ Redirect based on role
+        if ($result['role'] === 'admin') {
+          header("Location: admin.php");
+          exit;
+        } else {
+          header("Location: index.php");
+          exit;
+        }
 
-// // 📦 Fetch the first result (if any) as an associative array
-// // Returns false if no matching user is found
-// $result = $stmt->fetch();
+      } else {
+        $message = "❌ Invalid username or password.";
+      }
 
-  $showSql = $sql;
-
-  try {
-    $result = $pdo->query($sql)->fetch();
-
-    if ($result) {
-      $_SESSION['user'] = $result['username'];
-      $_SESSION['role'] = $result['role'];
-      $message = "✅ Login successful! Welcome, {$result['username']} (role: {$result['role']})";
-    } else {
-      $message = "❌ Login failed.";
+    } catch (PDOException $e) {
+      $message = "❌ SQL error: " . $e->getMessage();
     }
-  } catch (PDOException $e) {
-    $message = "❌ SQL error: " . $e->getMessage();
-  }
-}
+    }
 ?>
+
 
 <!DOCTYPE html>
 <html>

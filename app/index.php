@@ -1,3 +1,32 @@
+<?php
+session_start();
+require 'database.php';
+
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    die("⚠️ CSRF token mismatch. Request blocked.");
+  }
+
+  // Your POST logic here
+  $id = $_POST['id'] ?? null;
+
+  if ($id) {
+    $stmt = $pdo->prepare("DELETE FROM comments WHERE id = ?");
+    $stmt->execute([$id]);
+    echo "Comment deleted. <a href='index.php'>Go back</a>";
+  } else {
+    echo "Invalid request.";
+  }
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,29 +34,18 @@
   <title>Secure Comment App</title>
 </head>
 <body>
+  
   <h2>Leave a Comment</h2>
-<?php
-session_start();
-if (!isset($_SESSION['csrf_token'])) {
-  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-?>
+  <form action="post_comment.php" method="POST">
+    <textarea name="comment" rows="4" cols="50" placeholder="Type your comment..."></textarea><br>
+    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+    <button type="submit">Post</button>
+  </form>
 
-<h2>Leave a Comment</h2>
-<form action="post_comment.php" method="POST">
-  <textarea name="comment" rows="4" cols="50" placeholder="Type your comment..."></textarea><br>
-  <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-  <button type="submit">Post</button>
-</form>
-
-<h3>Comments</h3>
+  <h3>Comments</h3>
 <?php
 require 'database.php';
 
-// Generate CSRF token if not set
-if (!isset($_SESSION['csrf_token'])) {
-  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 
 // Fetch comments from DB
 $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY created_at DESC")->fetchAll();
@@ -38,25 +56,6 @@ $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY c
 <?php foreach ($comments as $row): ?>
   <p><?= $row['created_at'] ?>: <?= $row['comment'] ?></p>
 <?php endforeach; ?>
-
-<hr>
-
-<h3>✅ Protected against XSS (escaped output)</h3>
-<?php foreach ($comments as $row): ?>
-  <p><?= $row['created_at'] ?>: <?= htmlspecialchars($row['comment'], ENT_QUOTES, 'UTF-8') ?></p>
-  <form method="POST" action="delete_comment.php" style="display:inline">
-    <input type="hidden" name="id" value="<?= $row['id'] ?>">
-    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-    <button type="submit">🗑 Delete</button>
-  </form>
-<?php endforeach; ?>
-
-
-
-
-
-
-
 
 </body>
 </html>
