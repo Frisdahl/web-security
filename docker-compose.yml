@@ -3,7 +3,6 @@ version: "3.8"
 services:
   web:
     build: .
-    container_name: php_web
     ports:
       - "8080:80"
     volumes:
@@ -18,14 +17,16 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: security_demo
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin
-    container_name: pma
     ports:
       - "8081:80"
     environment:
       PMA_HOST: db
       PMA_USER: root
       PMA_PASSWORD: root
+
+volumes:
+  db_data:
