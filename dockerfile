@@ -7,7 +7,7 @@ RUN a2enmod rewrite
 RUN docker-php-ext-install pdo pdo_mysql
 
 # Copy SSL certificate (Aiven's CA cert)
-COPY aiven-ca.pem /etc/ssl/certs/aiven-ca.pem
+COPY ./app/aiven-ca.pem /etc/ssl/certs/aiven-ca.pem
 
 # Copy your application files
 COPY ./app /var/www/html/
