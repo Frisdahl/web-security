@@ -1,11 +1,6 @@
 <?php
 
 try {
-    $options = [
-        PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/ca-certificates.crt', // Render har typisk dette certifikat
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    ];
-
     $pdo = new PDO(
         'mysql:host=' . getenv('DB_HOST') .
         ';port=' . getenv('DB_PORT') .
@@ -13,9 +8,11 @@ try {
         ';charset=utf8mb4',
         getenv('DB_USER'),
         getenv('DB_PASS'),
-        $options
+        [
+            PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/aiven-ca.pem',
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        ]
     );
 } catch (PDOException $e) {
     die('Connection failed: ' . $e->getMessage());
 }
-?>
