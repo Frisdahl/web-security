@@ -2,11 +2,11 @@
 session_start();
 
 // ✅ Add security headers
-header("X-Frame-Options: DENY");
-header("X-Content-Type-Options: nosniff");
-header("Referrer-Policy: no-referrer");
-header("Permissions-Policy: geolocation=(), microphone=()");
-header("Content-Security-Policy: default-src 'self'; script-src 'self'");
+header("X-Frame-Options: DENY"); // DENY to prevent clickjacking
+header("X-Content-Type-Options: nosniff"); // to enforce MIME-type correctness
+header("Referrer-Policy: no-referrer"); // to avoid leaking URLs
+header("Permissions-Policy: geolocation=(), microphone=()");  // to disable geolocation and microphone access
+header("Content-Security-Policy: default-src 'self'; script-src 'self'"); // to restrict resources to the same origin
 
 
 require 'database.php';
