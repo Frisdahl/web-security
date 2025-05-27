@@ -1,5 +1,14 @@
 <?php
 session_start();
+
+
+// ✅ Add security headers
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+header("Referrer-Policy: no-referrer");
+header("Permissions-Policy: geolocation=(), microphone=()");
+header("Content-Security-Policy: default-src 'self'; script-src 'self'");
+
 require 'database.php';
 
 $showSql = '';
@@ -50,13 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
-<head><title>Login Demo</title></head>
+<head>
+  <title>Login Demo</title>
+</head>
+
 <body>
   <h2>Login (SQLi Demonstration)</h2>
   <form method="POST">
     <label>Username: <input name="username" type="text"></label><br>
     <label>Password: <input name="password" type="password"></label><br>
-    <button type="submit">Login</button>
+      <a href="register.php">Register here</a>
+      <button type="submit">Login</button>
+
   </form>
 
   <?php if ($showSql): ?>

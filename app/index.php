@@ -1,6 +1,22 @@
 <?php
 session_start();
+
+
+// ✅ Add security headers
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+header("Referrer-Policy: no-referrer");
+header("Permissions-Policy: geolocation=(), microphone=()");
+header("Content-Security-Policy: default-src 'self'; script-src 'self'");
+
+
 require 'database.php';
+
+// ✅ Redirect to register page if no one is logged in
+if (!isset($_SESSION['user'])) {
+  header("Location: login.php");
+  exit;
+}
 
 // Generate CSRF token if not set
 if (!isset($_SESSION['csrf_token'])) {
