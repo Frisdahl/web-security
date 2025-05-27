@@ -3,11 +3,22 @@ session_start();
 
 
 // ✅ Add security headers
-header("X-Frame-Options: DENY");
-header("X-Content-Type-Options: nosniff");
-header("Referrer-Policy: no-referrer");
-header("Permissions-Policy: geolocation=(), microphone=()");
-header("Content-Security-Policy: default-src 'self'; script-src 'self'");
+header("X-Frame-Options: DENY"); // DENY to prevent clickjacking
+header("X-Content-Type-Options: nosniff"); // to enforce MIME-type correctness
+header("Referrer-Policy: no-referrer"); // to avoid leaking URLs
+header("Permissions-Policy: geolocation=(), microphone=()");  // to disable geolocation and microphone access
+header("Content-Security-Policy: default-src 'self'; script-src 'self'"); // to restrict resources to the same origin
+
+
+// Max 5 loginforsøg
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+}
+
+if ($_SESSION['login_attempts'] >= 5) {
+    die("⚠️ Too many login attempts. Please wait 5 minutes.");
+}
+
 
 require 'database.php';
 
@@ -36,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user'] = $result['username'];
         $_SESSION['role'] = $result['role'];
         $message = "✅ Login successful! Welcome, {$result['username']} (role: {$result['role']})";
+        $_SESSION['login_attempts'] = 0;
 
         // ✅ Redirect based on role
         if ($result['role'] === 'admin') {
@@ -47,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
       } else {
+        $_SESSION['login_attempts']++;
         $message = "❌ Invalid username or password.";
       }
 
