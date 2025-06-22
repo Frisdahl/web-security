@@ -2,7 +2,7 @@
 session_start();
 
 
-// ✅ Add security headers
+// ✅ security headers
 header("X-Frame-Options: DENY"); // DENY to prevent clickjacking
 header("X-Content-Type-Options: nosniff"); // to enforce MIME-type correctness
 header("Referrer-Policy: no-referrer"); // to avoid leaking URLs

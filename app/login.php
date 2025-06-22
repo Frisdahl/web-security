@@ -2,7 +2,7 @@
 session_start();
 
 
-// ✅ Add security headers
+// ✅ security headers
 header("X-Frame-Options: DENY"); // DENY to prevent clickjacking
 header("X-Content-Type-Options: nosniff"); // to enforce MIME-type correctness
 header("Referrer-Policy: no-referrer"); // to avoid leaking URLs
@@ -37,17 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $password = $_POST['password'] ?? '';
 
 
-    // ❌ Unsafe SQL query (vulnerable to SQL injection)
-    // $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-
-
     try {
+      // ✅ Use prepared statements to prevent SQL injection
       $sql = "SELECT * FROM users WHERE username = ?";
       $showSql = $sql;
 
       $stmt = $pdo->prepare($sql);
       $stmt->execute([$username]);
       $result = $stmt->fetch();
+
 
       if ($result && password_verify($password, $result['password'])) {
         session_regenerate_id(true);
