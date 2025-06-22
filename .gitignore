@@ -1,0 +1,62 @@
+# Environment variables
+.env
+
+# SSL certificates and keys (IMPORTANT: Never commit these!)
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+aiven-ca.pem
+
+# Database credentials and connection files
+database.php
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# Logs
+*.log
+
+# Database files
+*.sql
+db_data/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# SSL certificates (if any)
+*.pem
+*.key
+*.crt
+
+# Node modules (if any)
+node_modules/
+
+# PHP vendor directory (if using Composer)
+vendor/
+
+# Cache directories
+cache/
+tmp/
