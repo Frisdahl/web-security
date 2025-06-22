@@ -4,7 +4,7 @@ document
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
 
-    await fetch("http://localhost:8080/post_comment.php", {
+    await fetch("http://localhost:3000/post_comment.php", {
       method: "POST",
       body: formData,
       credentials: "include",

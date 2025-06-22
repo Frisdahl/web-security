@@ -59,31 +59,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secure Comment App</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  
-  <h2>Leave a Comment</h2>
-  <form action="post_comment.php" method="POST">
-    <textarea name="comment" rows="4" cols="50" placeholder="Type your comment..."></textarea><br>
-    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-    <button type="submit">Post</button>
-  </form>
+  <div class="container">
+    <div class="header">
+      <h1>💬 Comment System</h1>
+      <p>Secure commenting with XSS demonstration</p>
+    </div>
+    
+    <nav class="nav">
+      <ul>
+        <li><a href="index.php">Comments</a></li>
+        <li><a href="protected.php">Protected Area</a></li>
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <li><a href="admin.php">Admin Panel</a></li>
+        <?php endif; ?>
+        <li><a href="login.php?logout=1">Logout</a></li>
+      </ul>
+    </nav>
+    
+    <div class="content">
+      <h2>Leave a Comment</h2>      <form action="post_comment.php" method="POST">
+        <label for="comment">Your Comment:</label>
+        <textarea name="comment" id="comment" rows="4" placeholder="Type your comment here..."></textarea>
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+        <button type="submit">Post Comment</button>
+      </form>
 
-  <h3>Comments</h3>
-<?php
-require 'database.php';
+      <div class="comments-section">
+        <h3>Recent Comments</h3>
+        <?php
+        require 'database.php';
+        
+        // Fetch comments from DB
+        $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY created_at DESC")->fetchAll();
+        ?>
 
-
-// Fetch comments from DB
-$comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY created_at DESC")->fetchAll();
-?>
-
-<h3>❌ Vulnerable to XSS (raw output)</h3>
-<!-- Try submitting: <script>alert('XSS works')</script> -->
-<?php foreach ($comments as $row): ?>
-  <p><?= $row['created_at'] ?>: <?= $row['comment'] ?></p>
-<?php endforeach; ?>
-
+        <div class="vulnerability-warning">
+          <h3><span class="security-icon danger"></span>Vulnerable to XSS (raw output)</h3>
+          <p>Try submitting: <code>&lt;script&gt;alert('XSS works')&lt;/script&gt;</code></p>
+        </div>
+        
+        <div class="comments-list">
+          <?php foreach ($comments as $row): ?>
+          <div class="comment">
+            <div class="comment-meta">
+              Posted on: <?= htmlspecialchars($row['created_at']) ?>
+            </div>
+            <div class="comment-content">
+              <?= $row['comment'] ?>
+            </div>
+            <div class="comment-actions">
+              <form method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this comment?')">Delete</button>
+              </form>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>&copy; 2025 Web Security Demo - Educational Purpose Only</p>
+    </div>
+  </div>
 </body>
 </html>

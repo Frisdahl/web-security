@@ -19,6 +19,13 @@ if ($_SESSION['login_attempts'] >= 5) {
     die("⚠️ Too many login attempts. Please wait 5 minutes.");
 }
 
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php?message=logged_out");
+    exit;
+}
 
 require 'database.php';
 
@@ -71,29 +78,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Web Security Demo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <h2>Login (SQLi Demonstration)</h2>
-  <form method="POST">
-    <label>Username: <input name="username" type="text"></label><br>
-    <label>Password: <input name="password" type="password"></label><br>
-      <a href="register.php">Register here</a>
-      <button type="submit">Login</button>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 Secure Login</h1>
+      <p>SQL Injection Protection Demonstration</p>
+    </div>
+    
+    <div class="content">
+      <h2>Login to Your Account</h2>
+        <?php if (isset($_GET['timeout'])): ?>
+      <div class="message message-warning">
+        <span class="security-icon warning"></span>
+        Your session has expired due to inactivity. Please log in again.
+      </div>
+      <?php endif; ?>
+      
+      <?php if (isset($_GET['message']) && $_GET['message'] === 'logged_out'): ?>
+      <div class="message message-success">
+        <span class="security-icon safe"></span>
+        You have been successfully logged out.
+      </div>
+      <?php endif; ?>
+      
+      <form method="POST">
+        <label for="username">Username:</label>
+        <input name="username" id="username" type="text" required>
+        
+        <label for="password">Password:</label>
+        <input name="password" id="password" type="password" required>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+          <a href="register.php" class="btn btn-success">Create Account</a>
+          <button type="submit">Login</button>
+        </div>
+      </form>
 
-  </form>
+      <?php if ($showSql): ?>
+      <div class="security-demo">
+        <h3><span class="security-icon safe"></span>SQL Query Used (Protected):</h3>
+        <pre><?= htmlspecialchars($showSql) ?></pre>
+        <p><strong>Note:</strong> This query uses prepared statements to prevent SQL injection attacks.</p>
+      </div>
+      <?php endif; ?>
 
-  <?php if ($showSql): ?>
-    <h3>SQL Query Used:</h3>
-    <pre><?= htmlspecialchars($showSql) ?></pre>
-  <?php endif; ?>
-
-  <?php if ($message): ?>
-    <p><strong><?= $message ?></strong></p>
-  <?php endif; ?>
-
+      <?php if ($message): ?>
+      <div class="message <?= strpos($message, '❌') !== false ? 'message-error' : 'message-success' ?>">
+        <?= $message ?>
+      </div>
+      <?php endif; ?>
+    </div>
+    
+    <div class="footer">
+      <p>&copy; 2025 Web Security Demo - Educational Purpose Only</p>
+    </div>
+  </div>
 </body>
 </html>

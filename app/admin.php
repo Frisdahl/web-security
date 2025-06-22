@@ -2,7 +2,7 @@
 session_start();
 
 
-// ✅ Add security headers
+// security headers
 header("X-Frame-Options: DENY"); // DENY to prevent clickjacking
 header("X-Content-Type-Options: nosniff"); // to enforce MIME-type correctness
 header("Referrer-Policy: no-referrer"); // to avoid leaking URLs
@@ -41,30 +41,87 @@ $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY c
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Secure Comment App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Web Security Demo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <h1>Admin Panel</h1>
-  <p>Welcome, <?= htmlspecialchars($_SESSION['user']) ?>!</p>
-
-  <h3>All Comments</h3>
-
-  <?php foreach ($comments as $row): ?>
-    <div>
-      <p><?= $row['created_at'] ?>: <?= htmlspecialchars($row['comment'], ENT_QUOTES, 'UTF-8') ?></p>
-
-      <!-- 🗑 Delete form (admin-only) -->
-      <form method="POST" action="delete_comment.php" style="display:inline;">
-        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-        <button type="submit">🗑 Delete</button>
-      </form>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ Admin Panel</h1>
+      <p>Administrative Control Center</p>
     </div>
-    <hr>
-  <?php endforeach; ?>
+    
+    <nav class="nav">
+      <ul>
+        <li><a href="index.php">Comments</a></li>
+        <li><a href="protected.php">Protected Area</a></li>
+        <li><a href="admin.php">Admin Panel</a></li>
+        <li><a href="login.php?logout=1">Logout</a></li>
+      </ul>
+    </nav>
+    
+    <div class="content">
+      <div class="admin-panel">
+        <h2>Welcome, <?= htmlspecialchars($_SESSION['user']) ?>!</h2>
+        <p>You have administrator privileges.</p>
+      </div>
+      
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-number"><?= count($comments) ?></div>
+          <div class="stat-label">Total Comments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">1</div>
+          <div class="stat-label">Active Admin</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">System Health</div>
+        </div>
+      </div>
 
-  <p><a href="index.php">Back to main site</a></p>
+      <h3>Comment Management</h3>
+      <div class="security-fixed">
+        <span class="security-icon safe"></span>
+        <strong>Security Note:</strong> Comments are properly escaped in admin view to prevent XSS attacks.
+      </div>
 
+      <div class="comments-list">
+        <?php foreach ($comments as $row): ?>
+        <div class="comment">
+          <div class="comment-meta">
+            <strong>ID:</strong> <?= $row['id'] ?> | 
+            <strong>Posted:</strong> <?= htmlspecialchars($row['created_at']) ?>
+          </div>
+          <div class="comment-content">
+            <?= htmlspecialchars($row['comment'], ENT_QUOTES, 'UTF-8') ?>
+          </div>
+          <div class="comment-actions">
+            <form method="POST" action="delete_comment.php" style="display:inline;">
+              <input type="hidden" name="id" value="<?= $row['id'] ?>">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+              <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this comment?')">
+                🗑️ Delete Comment
+              </button>
+            </form>
+          </div>
+        </div>
+        <?php endforeach; ?>
+        
+        <?php if (empty($comments)): ?>
+        <div class="message message-info">
+          <span class="security-icon"></span>
+          No comments found. Users can post comments from the main page.
+        </div>
+        <?php endif; ?>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>&copy; 2025 Web Security Demo - Educational Purpose Only</p>
+    </div>
+  </div>
 </body>
 </html>

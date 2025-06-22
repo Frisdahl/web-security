@@ -52,32 +52,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Register</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Web Security Demo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h2>User Registration</h2>
-  <form method="POST">
-    <label>Username: <input name="username" type="text" required></label><br>
-    <label>Password: <input name="password" type="password" required></label><br>
-    <label>Role:
-      <select name="role">
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select>
-    </label><br>
-    <button type="submit">Register</button>
-  </form>
+  <div class="container">
+    <div class="header">
+      <h1>👤 Create Account</h1>
+      <p>Secure User Registration</p>
+    </div>
+    
+    <div class="content">
+      <h2>Register New Account</h2>
+      
+      <form method="POST">
+        <label for="username">Username:</label>
+        <input name="username" id="username" type="text" required placeholder="Choose a unique username">
+        
+        <label for="password">Password:</label>
+        <input name="password" id="password" type="password" required placeholder="Enter a secure password">
+        
+        <label for="role">Account Type:</label>
+        <select name="role" id="role">
+          <option value="user">Standard User</option>
+          <option value="admin">Administrator</option>
+        </select>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+          <a href="login.php" class="btn btn-warning">Back to Login</a>
+          <button type="submit">Create Account</button>
+        </div>
+      </form>
 
-  <?php if ($showSql): ?>
-    <h3>SQL Query Used:</h3>
-    <pre><?= htmlspecialchars($showSql) ?></pre>
-  <?php endif; ?>
+      <?php if ($showSql): ?>
+      <div class="security-demo">
+        <h3><span class="security-icon safe"></span>SQL Query Used:</h3>
+        <pre><?= htmlspecialchars($showSql) ?></pre>
+        <p><strong>Note:</strong> Passwords are securely hashed using PHP's password_hash() function.</p>
+      </div>
+      <?php endif; ?>
 
-  <?php if ($message): ?>
-    <p><strong><?= $message ?></strong></p>
-  <?php endif; ?>
+      <?php if ($message): ?>
+      <div class="message <?= strpos($message, '❌') !== false ? 'message-error' : 'message-success' ?>">
+        <?= $message ?>
+      </div>
+      <?php endif; ?>
+    </div>
+    
+    <div class="footer">
+      <p>&copy; 2025 Web Security Demo - Educational Purpose Only</p>
+    </div>
+  </div>
 </body>
 </html>
