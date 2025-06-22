@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_regenerate_id(true);
         $_SESSION['user'] = $result['username'];
         $_SESSION['role'] = $result['role'];
+        $_SESSION['user_id'] = $result['id']; // Store user ID in session
         $message = "✅ Login successful! Welcome, {$result['username']} (role: {$result['role']})";
         $_SESSION['login_attempts'] = 0;
 

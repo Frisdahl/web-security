@@ -27,8 +27,9 @@ $message = '';
 
 if (!empty(trim($comment))) {
     try {
-        $stmt = $pdo->prepare("INSERT INTO comments (comment) VALUES (:comment)");
-        $stmt->execute(['comment' => $comment]);
+        // Add user_id when inserting comments
+        $stmt = $pdo->prepare("INSERT INTO comments (comment, user_id) VALUES (?, ?)");
+        $stmt->execute([$comment, $_SESSION['user_id']]);
         $success = true;
         $message = "Comment posted successfully!";
     } catch (PDOException $e) {

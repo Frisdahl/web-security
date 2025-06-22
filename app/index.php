@@ -95,8 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php
         require 'database.php';
         
-        // Fetch comments from DB
-        $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY created_at DESC")->fetchAll();
+        // Fetch comments from DB for current user only
+        $stmt = $pdo->prepare("SELECT id, comment, created_at FROM comments WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$_SESSION['user_id']]);
+        $comments = $stmt->fetchAll();
         ?>
 
         <div class="vulnerability-warning">
