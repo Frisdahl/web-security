@@ -118,25 +118,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_image'])) {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $maxFileSize = 5 * 1024 * 1024; // 5MB
-        
-        $fileType = $file['type'];
+
         $fileSize = $file['size'];
         $fileName = $file['name'];
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         
-        // Validate file type
-        if (!in_array($fileType, $allowedTypes) || !in_array($fileExtension, $allowedExtensions)) {
-            $message = "Invalid file type. Only JPG, PNG, GIF, and WEBP images are allowed.";
+        // ✅ KRITISK: Verify file is actually an image FØRST
+        $imageInfo = getimagesize($file['tmp_name']);
+        if ($imageInfo === false) {
+            $message = "File is not a valid image.";
             $messageType = 'error';
         }
-        // Validate file size
+        // ✅ Use the SECURE MIME type from getimagesize()
+        elseif (!in_array($imageInfo['mime'], $allowedTypes)) {
+            $message = "Invalid image type. Only JPG, PNG, GIF, and WEBP images are allowed.";
+            $messageType = 'error';
+        }
+        // ✅ Validate file extension
+        elseif (!in_array($fileExtension, $allowedExtensions)) {
+            $message = "Invalid file extension. Only jpg, jpeg, png, gif, webp allowed.";
+            $messageType = 'error';
+        }
+        // ✅ Validate file size
         elseif ($fileSize > $maxFileSize) {
             $message = "File too large. Maximum size is 5MB.";
-            $messageType = 'error';
-        }
-        // Additional security: Check if file is actually an image
-        elseif (!getimagesize($file['tmp_name'])) {
-            $message = "File is not a valid image.";
             $messageType = 'error';
         }
         else {
@@ -157,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_image'])) {
                     unlink($user['profile_image']);
                 }
                 
-                // Update database - check if profile_image column exists
+                // Update database
                 try {
                     $stmt = $pdo->prepare("UPDATE users SET profile_image = ? WHERE id = ?");
                     $stmt->execute([$uploadPath, $user_id]);
@@ -169,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_image'])) {
                     $user['profile_image'] = $uploadPath;
                     
                 } catch (PDOException $e) {
-                    $message = "Database error: " . $e->getMessage();
+                    $message = "Database error: " . htmlspecialchars($e->getMessage());
                     $messageType = 'error';
                     // Clean up uploaded file on database error
                     if (file_exists($uploadPath)) {
