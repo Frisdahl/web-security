@@ -55,8 +55,11 @@ $comments = $pdo->query("SELECT id, comment, created_at FROM comments ORDER BY c
     <nav class="nav">
       <ul>
         <li><a href="index.php">Comments</a></li>
+        <li><a href="profile.php">Profile</a></li>
         <li><a href="protected.php">Protected Area</a></li>
-        <li><a href="admin.php">Admin Panel</a></li>
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <li><a href="admin.php" class="active">Admin Panel</a></li>
+        <?php endif; ?>
         <li><a href="login.php?logout=1">Logout</a></li>
       </ul>
     </nav>

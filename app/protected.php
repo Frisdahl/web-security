@@ -42,8 +42,9 @@ if (!isset($_SESSION['user'])) {
     <nav class="nav">
       <ul>
         <li><a href="index.php">Comments</a></li>
-        <li><a href="protected.php">Protected Area</a></li>
-        <?php if ($_SESSION['role'] === 'admin'): ?>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="protected.php" class="active">Protected Area</a></li>
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         <li><a href="admin.php">Admin Panel</a></li>
         <?php endif; ?>
         <li><a href="login.php?logout=1">Logout</a></li>
